@@ -1,0 +1,28 @@
+package com.sparta.backend_12.presentation.controller;
+
+import com.sparta.backend_12.application.dto.UserSignupResponse;
+import com.sparta.backend_12.application.service.AuthService;
+import com.sparta.backend_12.presentation.dto.UserSignupRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@Slf4j
+@RequiredArgsConstructor
+@RestController
+public class AuthController {
+
+    private final AuthService authService;
+
+    @PostMapping("/signup")
+    public ResponseEntity<UserSignupResponse> signup(@RequestBody @Valid UserSignupRequest request) {
+        log.info("signup.UserSignUpRequest: {}", request);
+        UserSignupResponse response = authService.signup(request.toServiceDto());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+}
