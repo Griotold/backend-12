@@ -33,4 +33,8 @@ public class User {
                 .role(role)
                 .build();
     }
+
+    public static User createAsUser(String username, String password, String nickname) {
+        return create(username, password, nickname, Role.USER);
+    }
 }
