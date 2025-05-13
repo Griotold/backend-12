@@ -2,7 +2,7 @@ package com.sparta.backend_12.presentation.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.backend_12.domain.entity.User;
-import com.sparta.backend_12.infra.UserRepository;
+import com.sparta.backend_12.infra.repository.UserRepository;
 import com.sparta.backend_12.presentation.dto.UserSignupRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

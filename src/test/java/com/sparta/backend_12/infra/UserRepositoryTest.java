@@ -2,6 +2,7 @@ package com.sparta.backend_12.infra;
 
 import com.sparta.backend_12.domain.entity.User;
 import com.sparta.backend_12.domain.enums.Role;
+import com.sparta.backend_12.infra.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
