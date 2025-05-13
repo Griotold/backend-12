@@ -3,6 +3,7 @@ package com.sparta.backend_12.presentation.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.backend_12.domain.entity.User;
 import com.sparta.backend_12.infra.repository.UserRepository;
+import com.sparta.backend_12.presentation.dto.UserLoginRequest;
 import com.sparta.backend_12.presentation.dto.UserSignupRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -33,6 +35,9 @@ class AuthControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("회원가입 성공")
@@ -81,4 +86,64 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.error.code").value("USER_ALREADY_EXISTS"))
                 .andExpect(jsonPath("$.error.message").value("이미 가입된 사용자입니다."));
     }
+
+    @Test
+    @DisplayName("로그인 성공 - JWT 토큰 반환")
+    void login_Success_ReturnsJwtToken() throws Exception {
+        // Given
+        String username = "testUser";
+        String password = "password123!";
+        User user = User.createAsUser(username, passwordEncoder.encode(password), "TestNick");
+        userRepository.save(user);
+
+        UserLoginRequest request = new UserLoginRequest(username, password);
+        String requestBody = om.writeValueAsString(request);
+
+        // When
+        ResultActions result = mvc.perform(post("/login")
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isString());
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 잘못된 비밀번호")
+    void login_InvalidPassword_ThrowsException() throws Exception {
+        // Given
+        String username = "testUser";
+        String password = "password123!";
+        User user = User.createAsUser(username, passwordEncoder.encode(password), "TestNick");
+        userRepository.save(user);
+
+        UserLoginRequest request = new UserLoginRequest(username, "wrongPassword");
+        String requestBody = om.writeValueAsString(request);
+
+        // When & Then
+        mvc.perform(post("/login")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("INVALID_CREDENTIALS"))
+                .andExpect(jsonPath("$.error.message").value("아이디 또는 비밀번호가 올바르지 않습니다."));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 존재하지 않는 사용자")
+    void login_UserNotFound_ThrowsException() throws Exception {
+        // Given
+        UserLoginRequest request = new UserLoginRequest("nonExistingUser", "anyPassword");
+        String requestBody = om.writeValueAsString(request);
+
+        // When & Then
+        mvc.perform(post("/login")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("INVALID_CREDENTIALS"))
+                .andExpect(jsonPath("$.error.message").value("아이디 또는 비밀번호가 올바르지 않습니다."));
+    }
+
 }

@@ -2,7 +2,8 @@ package com.sparta.backend_12.application.service;
 
 import com.sparta.backend_12.application.component.PasswordValidator;
 import com.sparta.backend_12.application.component.UsernameValidator;
-import com.sparta.backend_12.application.dto.UserSignin;
+import com.sparta.backend_12.application.dto.UserLogin;
+import com.sparta.backend_12.application.dto.UserLoginResponse;
 import com.sparta.backend_12.application.dto.UserSignup;
 import com.sparta.backend_12.application.dto.UserSignupResponse;
 import com.sparta.backend_12.application.exception.AuthException;
@@ -42,14 +43,14 @@ public class AuthService {
         return UserSignupResponse.from(userRepository.save(user));
     }
 
-    public String signin(UserSignin signin) {
-        log.info("signin.UserSignin: {}", signin);
-        User user = userRepository.findByUsername(signin.username())
-                .orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
+    public UserLoginResponse login(UserLogin userLogin) {
+        log.info("userLogin.UserLogin: {}", userLogin);
+        User user = userRepository.findByUsername(userLogin.username())
+                .orElseThrow(() -> new AuthException(ErrorCode.INVALID_CREDENTIALS));
 
-        passwordValidator.validatePassword(signin.password(), user.getPassword());
+        passwordValidator.validatePassword(userLogin.password(), user.getPassword());
 
-        return jwtTokenProvider.generateToken(user);
+        return UserLoginResponse.from(jwtTokenProvider.generateToken(user));
     }
 
 }

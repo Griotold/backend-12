@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers("/signup").permitAll()
-                        .requestMatchers("/signin").permitAll()
+                        .requestMatchers("/login").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )
