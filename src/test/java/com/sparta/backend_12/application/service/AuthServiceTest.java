@@ -1,12 +1,15 @@
 package com.sparta.backend_12.application.service;
 
+import com.sparta.backend_12.application.dto.UserSignin;
 import com.sparta.backend_12.application.dto.UserSignup;
 import com.sparta.backend_12.application.dto.UserSignupResponse;
 import com.sparta.backend_12.application.exception.AuthException;
 import com.sparta.backend_12.application.exception.ErrorCode;
 import com.sparta.backend_12.domain.entity.User;
 import com.sparta.backend_12.domain.enums.Role;
+import com.sparta.backend_12.infra.config.security.JwtTokenProvider;
 import com.sparta.backend_12.infra.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,7 @@ class AuthServiceTest {
     @Autowired AuthService authService;
     @Autowired UserRepository userRepository;
     @Autowired PasswordEncoder passwordEncoder;
+    @Autowired JwtTokenProvider jwtTokenProvider;
 
     @DisplayName("회원가입 성공 - 정상적인 요청 시 사용자 생성")
     @Test
@@ -66,5 +70,48 @@ class AuthServiceTest {
         // 중복 데이터 개수 확인
         long userCount = userRepository.count();
         assertThat(userCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("signin 성공 - 유효한 자격증명으로 JWT 토큰 반환")
+    void signin_Success_ReturnsJwtToken() {
+        // given
+        User user = User.createAsUser("testUser", passwordEncoder.encode("password123!"), "TestNick");
+        userRepository.save(user);
+        UserSignin request = new UserSignin("testUser", "password123!");
+
+        // when
+        String token = authService.signin(request);
+
+        // then
+        assertThat(token).isNotBlank();
+        String username = jwtTokenProvider.extractUsername(token);
+        assertThat(username).isEqualTo("testUser");
+    }
+
+    @Test
+    @DisplayName("signin 실패 - 존재하지 않는 사용자명")
+    void signin_UserNotFound_ThrowsException() {
+        // given
+        UserSignin request = new UserSignin("nonExistingUser", "anyPassword");
+
+        // when & then
+        assertThatThrownBy(() -> authService.signin(request))
+                .isInstanceOf(AuthException.class)
+                .hasMessageContaining(ErrorCode.USER_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("signin 실패 - 잘못된 비밀번호")
+    void signin_WrongPassword_ThrowsException() {
+        // given
+        User user = User.createAsUser("testUser", passwordEncoder.encode("password123!"), "TestNick");
+        userRepository.save(user);
+        UserSignin request = new UserSignin("testUser", "wrongPassword");
+
+        // when & then
+        assertThatThrownBy(() -> authService.signin(request))
+                .isInstanceOf(AuthException.class)
+                .hasMessageContaining(ErrorCode.INVALID_CREDENTIALS.getMessage());
     }
 }
