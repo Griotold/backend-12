@@ -1,4 +1,4 @@
-package com.sparta.backend_12.infra;
+package com.sparta.backend_12.infra.repository;
 
 import com.sparta.backend_12.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
