@@ -49,5 +49,23 @@ class UserTest {
         assertThat(user.getRole()).isEqualTo(Role.USER);
     }
 
+    @DisplayName("updateAdminRole - 역할을 ADMIN 으로 변경")
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"USER", "ADMIN"})
+    void updateAdminRole(Role initialRole) {
+        // given: 초기 역할 설정
+        User user = User.create(
+                "testUser",
+                "password123!",
+                "테스트유저",
+                initialRole
+        );
+
+        // when
+        user.updateAdminRole();
+
+        // then: 어떤 역할로 시작하든 ADMIN으로 변경
+        assertThat(user.getRole()).isEqualTo(Role.ADMIN);
+    }
 
 }

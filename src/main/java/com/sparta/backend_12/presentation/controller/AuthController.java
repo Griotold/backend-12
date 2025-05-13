@@ -10,9 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,5 +31,11 @@ public class AuthController {
         log.info("login.UserLoginRequest: {}", request);
         UserLoginResponse response = authService.login(request.toServiceDto());
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/admin/users/{userId}/roles")
+    public ResponseEntity<UserSignupResponse> grantAdminRole(@PathVariable("userId") Long userId) {
+        log.info("admin/users/{userId}/roles: {}", userId);
+        return null;
     }
 }

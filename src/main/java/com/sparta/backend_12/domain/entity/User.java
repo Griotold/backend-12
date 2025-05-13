@@ -37,4 +37,8 @@ public class User {
     public static User createAsUser(String username, String password, String nickname) {
         return create(username, password, nickname, Role.USER);
     }
+
+    public void updateAdminRole() {
+        this.role = Role.ADMIN;
+    }
 }
