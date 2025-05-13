@@ -1,5 +1,6 @@
 package com.sparta.backend_12.presentation.controller;
 
+import com.sparta.backend_12.application.dto.UserEditResponse;
 import com.sparta.backend_12.application.dto.UserLoginResponse;
 import com.sparta.backend_12.application.dto.UserSignupResponse;
 import com.sparta.backend_12.application.service.AuthService;
@@ -34,8 +35,9 @@ public class AuthController {
     }
 
     @PatchMapping("/admin/users/{userId}/roles")
-    public ResponseEntity<UserSignupResponse> grantAdminRole(@PathVariable("userId") Long userId) {
+    public ResponseEntity<UserEditResponse> grantAdminRole(@PathVariable("userId") Long userId) {
         log.info("admin/users/{userId}/roles: {}", userId);
-        return null;
+        UserEditResponse response = authService.grantAdminRole(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
