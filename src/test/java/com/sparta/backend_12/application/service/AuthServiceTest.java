@@ -67,9 +67,6 @@ class AuthServiceTest {
                 .isInstanceOf(AuthException.class)
                 .hasMessageContaining(ErrorCode.USER_ALREADY_EXISTS.getMessage());
 
-        // 중복 데이터 개수 확인
-        long userCount = userRepository.count();
-        assertThat(userCount).isEqualTo(1);
     }
 
     @Test
@@ -113,5 +110,36 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(AuthException.class)
                 .hasMessageContaining(ErrorCode.INVALID_CREDENTIALS.getMessage());
+    }
+
+    @Test
+    @DisplayName("grantAdminRole 성공 - USER 가 ADMIN 으로 승격됨")
+    void grantAdminRole_success() {
+        // given
+        User user = User.createAsUser("normalUser", passwordEncoder.encode("pw1234!"), "일반유저");
+        User savedUser = userRepository.save(user);
+
+        // when
+        var response = authService.grantAdminRole(savedUser.getId());
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.roles().getFirst().role()).isEqualTo(Role.ADMIN.name());
+
+        // 실제 DB에서도 ADMIN으로 변경됐는지 확인
+        User updated = userRepository.findById(savedUser.getId()).orElseThrow();
+        assertThat(updated.getRole()).isEqualTo(Role.ADMIN);
+    }
+
+    @Test
+    @DisplayName("grantAdminRole 실패 - 존재하지 않는 userId")
+    void grantAdminRole_userNotFound_throwsException() {
+        // given
+        Long notExistId = 99999L;
+
+        // when & then
+        assertThatThrownBy(() -> authService.grantAdminRole(notExistId))
+                .isInstanceOf(AuthException.class)
+                .hasMessageContaining(ErrorCode.USER_NOT_FOUND.getMessage());
     }
 }

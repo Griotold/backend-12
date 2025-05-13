@@ -2,10 +2,7 @@ package com.sparta.backend_12.application.service;
 
 import com.sparta.backend_12.application.component.PasswordValidator;
 import com.sparta.backend_12.application.component.UsernameValidator;
-import com.sparta.backend_12.application.dto.UserLogin;
-import com.sparta.backend_12.application.dto.UserLoginResponse;
-import com.sparta.backend_12.application.dto.UserSignup;
-import com.sparta.backend_12.application.dto.UserSignupResponse;
+import com.sparta.backend_12.application.dto.*;
 import com.sparta.backend_12.application.exception.AuthException;
 import com.sparta.backend_12.application.exception.ErrorCode;
 import com.sparta.backend_12.domain.entity.User;
@@ -51,6 +48,16 @@ public class AuthService {
         passwordValidator.validatePassword(userLogin.password(), user.getPassword());
 
         return UserLoginResponse.from(jwtTokenProvider.generateToken(user));
+    }
+
+    @Transactional
+    public UserEditResponse grantAdminRole(Long userId) {
+        log.info("grantAdminRole.userId: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
+
+        user.updateAdminRole();
+        return UserEditResponse.from(user);
     }
 
 }
