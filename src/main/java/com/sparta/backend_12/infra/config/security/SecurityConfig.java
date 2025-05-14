@@ -34,9 +34,11 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/signup").permitAll()
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/signup",
+                                "/login",
+                                "/h2-console/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/admin/users/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

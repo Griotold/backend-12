@@ -3,6 +3,7 @@ package com.sparta.backend_12.application.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -55,8 +57,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> methodArgumentNotValidException(final MethodArgumentNotValidException e){
         log.error(String.format(ERROR_LOG, e.getParameter(), e.getStatusCode()));
-        String defaultMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        ExceptionResponse.Error error = new ExceptionResponse.Error("VALIDATION_ERROR", defaultMessage);
+
+        String errorMessages = e.getBindingResult().getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        ExceptionResponse.Error error = new ExceptionResponse.Error("VALIDATION_ERROR", errorMessages);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(error));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        log.error(String.format(ERROR_LOG, "HttpMessageNotReadableException", e.getMessage()));
+        ExceptionResponse.Error error = new ExceptionResponse.Error(
+                "VALIDATION_ERROR",
+                "request body 를 입력하세요."
+        );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(error));
     }
 }
