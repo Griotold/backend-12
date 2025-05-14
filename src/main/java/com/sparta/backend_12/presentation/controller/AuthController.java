@@ -157,6 +157,78 @@ public class AuthController {
     }
 
     @PatchMapping("/admin/users/{userId}/roles")
+    @Operation(
+            summary = "관리자 권한 부여",
+            description = "ADMIN 권한이 필요합니다.<br><br>username: admin<br>password: admin1234"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "관리자 권한 부여 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserEditResponse.class),
+                            examples = @ExampleObject(
+                                    name = "권한 부여 성공",
+                                    summary = "관리자 권한 부여 성공 예시",
+                                    value = """
+                                {
+                                  "username": "JIN HO",
+                                  "nickname": "Mentos",
+                                  "roles": [
+                                    {
+                                      "role": "Admin"
+                                    }
+                                  ]
+                                }
+                                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "권한이 부족한 경우(접근 제한)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class),
+                            examples = @ExampleObject(
+                                    name = "권한 부족",
+                                    summary = "접근 권한 없음",
+                                    value = """
+                                {
+                                  "error": {
+                                    "code": "ACCESS_DENIED",
+                                    "message": "관리자 권한이 필요한 요청입니다. 접근 권한이 없습니다."
+                                  }
+                                }
+                                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없는 경우",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class),
+                            examples = @ExampleObject(
+                                    name = "사용자 없음",
+                                    summary = "해당 ID의 사용자 없음",
+                                    value = """
+                                {
+                                  "error": {
+                                    "code": "USER_NOT_FOUND",
+                                    "message": "사용자를 찾을 수 없습니다."
+                                  }
+                                }
+                                """
+                            )
+                    )
+            )
+    })
+    @Parameters({
+            @Parameter(name = "userId", description = "권한을 부여할 사용자 ID", example = "1", required = true)
+    })
     public ResponseEntity<UserEditResponse> grantAdminRole(@PathVariable("userId") Long userId) {
         log.info("admin/users/{userId}/roles: {}", userId);
         UserEditResponse response = authService.grantAdminRole(userId);
