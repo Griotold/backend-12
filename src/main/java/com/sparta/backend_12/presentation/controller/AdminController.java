@@ -49,7 +49,7 @@ public class AdminController {
                                   "nickname": "Mentos",
                                   "roles": [
                                     {
-                                      "role": "Admin"
+                                      "role": "ADMIN"
                                     }
                                   ]
                                 }
