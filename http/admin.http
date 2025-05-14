@@ -1,0 +1,13 @@
+### 관리자 로그인
+POST localhost:8080/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin1234"
+}
+
+### 관리자 권한 부여
+PATCH localhost:8080/admin/users/2/roles
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiQURNSU4iLCJzdWIiOiJhZG1pbiIsImlhdCI6MTc0NzIwNzUwNiwiZXhwIjoxNzQ3MjExMTA2fQ.H_sM6u-TPR8X5fb3qEuYbdSMlIvEesSkEmQLySowbZQ
