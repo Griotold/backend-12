@@ -99,7 +99,7 @@ public class AdminController {
             )
     })
     @Parameters({
-            @Parameter(name = "userId", description = "권한을 부여할 사용자 ID", example = "1", required = true)
+            @Parameter(name = "userId", description = "권한을 부여할 사용자 ID", example = "2", required = true)
     })
     public ResponseEntity<UserEditResponse> grantAdminRole(@PathVariable("userId") Long userId) {
         log.info("admin/users/{userId}/roles: {}", userId);
