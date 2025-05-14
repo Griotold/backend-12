@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "인증/회원 API", description = "회원가입, 로그인 등 인증 기능을 제공합니다.")
@@ -33,6 +32,71 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
+    @Operation(summary = "회원가입", description = "username, password, nickname 이 필요합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "회원가입 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserSignupResponse.class),
+                            examples = @ExampleObject(
+                                    name = "회원가입 성공",
+                                    summary = "회원가입 성공 예시",
+                                    value = """
+                                            {
+                                              "username": "JIN HO",
+                                              "nickname": "Mentos",
+                                              "roles": [
+                                                {
+                                                  "role": "USER"
+                                                }
+                                              ]
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "이미 가입된 사용자 또는 유효성 검증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "회원가입 실패 - 이미 가입된 사용자",
+                                            summary = "이미 가입된 사용자",
+                                            value = """
+                                                    {
+                                                      "error": {
+                                                        "code": "USER_ALREADY_EXISTS",
+                                                        "message": "이미 가입된 사용자입니다."
+                                                      }
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "회원가입 실패 - 유효성 검증 실패",
+                                            summary = "필수값 누락",
+                                            value = """
+                                                    {
+                                                      "error": {
+                                                        "code": "VALIDATION_ERROR",
+                                                        "message": "username 은 필수 입력값입니다."
+                                                      }
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    })
+    @Parameters({
+            @Parameter(name = "username", description = "회원 이름", example = "JIN HO"),
+            @Parameter(name = "password", description = "비밀번호", example = "12341234"),
+            @Parameter(name = "nickname", description = "별명", example = "Mentos"),
+    })
     public ResponseEntity<UserSignupResponse> signup(@RequestBody @Valid UserSignupRequest request) {
         log.info("signup.UserSignUpRequest: {}", request);
         UserSignupResponse response = authService.signup(request.toServiceDto());
@@ -40,7 +104,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "로그인을 합니다.", description = "username 과 password 가 필요합니다.")
+    @Operation(summary = "로그인", description = "username ,password 가 필요합니다.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -58,25 +122,25 @@ public class AuthController {
                                             name = "로그인 실패",
                                             summary = "잘못된 계정 정보",
                                             value = """
-                {
-                  "error": {
-                    "code": "INVALID_CREDENTIALS",
-                    "message": "아이디 또는 비밀번호가 올바르지 않습니다."
-                  }
-                }
-                """
+                                                    {
+                                                      "error": {
+                                                        "code": "INVALID_CREDENTIALS",
+                                                        "message": "아이디 또는 비밀번호가 올바르지 않습니다."
+                                                      }
+                                                    }
+                                                    """
                                     ),
                                     @ExampleObject(
                                             name = "유효성 검증 실패",
                                             summary = "필수값 누락",
                                             value = """
-                {
-                  "error": {
-                    "code": "VALIDATION_ERROR",
-                    "message": "username 은 필수 입력값입니다."
-                  }
-                }
-                """
+                                                    {
+                                                      "error": {
+                                                        "code": "VALIDATION_ERROR",
+                                                        "message": "username 은 필수 입력값입니다."
+                                                      }
+                                                    }
+                                                    """
                                     )
                             }
                     )
