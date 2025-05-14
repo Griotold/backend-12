@@ -49,15 +49,4 @@ public class AuthService {
 
         return UserLoginResponse.from(jwtTokenProvider.generateToken(user));
     }
-
-    @Transactional
-    public UserEditResponse grantAdminRole(Long userId) {
-        log.info("grantAdminRole.userId: {}", userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
-
-        user.updateAdminRole();
-        return UserEditResponse.from(user);
-    }
-
 }

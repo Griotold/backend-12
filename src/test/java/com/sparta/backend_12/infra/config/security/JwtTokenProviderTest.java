@@ -33,8 +33,7 @@ class JwtTokenProviderTest {
     @Test
     void generateToken_ValidUser_ReturnsJwtWithClaims() {
         // given
-        User user = User.create("JIN HO", "12341234", "Mentos", Role.USER);
-        ReflectionTestUtils.setField(user, "id", 1L);
+        User user = createUser("JIN HO", 1L);
 
         // when
         String token = jwtTokenProvider.generateToken(user);
@@ -49,20 +48,11 @@ class JwtTokenProviderTest {
 
     }
 
-    private Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(jwtTokenProvider.getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
     @Test
     @DisplayName("토큰은 표준 JWT 구조를 가져야 함")
     void token_ShouldHaveThreeParts() {
         // given
-        User user = User.create("user1", "pwd", "nick", Role.USER);
-        ReflectionTestUtils.setField(user, "id", 2L);
+        User user = createUser("JIN HO", 1L);
 
         // when
         String token = jwtTokenProvider.generateToken(user);
@@ -73,9 +63,9 @@ class JwtTokenProviderTest {
 
     @Test
     @DisplayName("헤더에는 HS256 알고리즘이 명시되어야 함")
-    void tokenHeader_ShouldContainHS256Algorithm() throws Exception {
+    void tokenHeader_ShouldContainHS256Algorithm() {
         // given
-        User user = User.create("user2", "pwd", "nick", Role.USER);
+        User user = createUser("JIN HO", 1L);
 
         // when
         String token = jwtTokenProvider.generateToken(user);
@@ -104,7 +94,7 @@ class JwtTokenProviderTest {
     @DisplayName("만료 시간은 발급 시간 + 1시간 이어야 함")
     void tokenExpiration_ShouldBeOneHourAfterIssuedAt() {
         // given
-        User user = User.create("timeTest", "pwd", "nick", Role.USER);
+        User user = createUser("JIN HO", 1L);
 
         // when
         String token = jwtTokenProvider.generateToken(user);
@@ -122,8 +112,7 @@ class JwtTokenProviderTest {
     @DisplayName("동일 사용자로 생성된 여러 토큰의 클레임은 일관적이어야 함")
     void multipleTokens_ForSameUser_ShouldHaveConsistentClaims() {
         // given
-        User user = User.create("multiUser", "pwd", "nick", Role.USER);
-        ReflectionTestUtils.setField(user, "id", 5L);
+        User user = createUser("JIN HO", 1L);
 
         // when
         String token1 = jwtTokenProvider.generateToken(user);
@@ -142,8 +131,7 @@ class JwtTokenProviderTest {
     @Test
     void extractUsername_ValidToken_ReturnsUsername() {
         // given
-        User user = User.create("testUser", "password", "nick", Role.USER);
-        ReflectionTestUtils.setField(user, "id", 1L);
+        User user = createUser("JIN HO", 1L);
 
         // when
         String token = jwtTokenProvider.generateToken(user);
@@ -188,7 +176,7 @@ class JwtTokenProviderTest {
     @Test
     void isTokenValid_expiredToken_ReturnsFalse() {
         // given
-        User user = createUser("expiredUser", 3L);
+        User user = createUser("expiredUser", 1L);
         UserDetails userDetails = new LoginUser(user);
 
         String expiredToken = Jwts.builder()
@@ -207,7 +195,7 @@ class JwtTokenProviderTest {
     @Test
     void isTokenValid_tamperedToken_ThrowsException() {
         // given
-        User user = createUser("userC", 4L);
+        User user = createUser("userC", 1L);
         String validToken = jwtTokenProvider.generateToken(user);
         String tamperedToken = validToken + "tampered";
         UserDetails userDetails = new LoginUser(user);
@@ -221,5 +209,13 @@ class JwtTokenProviderTest {
         User user = User.create(username, "password", "nick", Role.USER);
         ReflectionTestUtils.setField(user, "id", id);
         return user;
+    }
+
+    private Claims parseToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(jwtTokenProvider.getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
