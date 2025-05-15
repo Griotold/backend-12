@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "관리자 API", description = "회원가입, 로그인 등 인증 기능을 제공합니다.")
+@Tag(name = "관리자 API", description = "관리자 권한 부여 등 관리자 기능을 제공합니다.")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
